@@ -1,25 +1,67 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import type { NavigationProp } from '@react-navigation/native';
+import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Preview3D } from 'react-native-3d';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from './App';
+import { colors, spacing } from './theme';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const HERO_HEIGHT = SCREEN_WIDTH * 0.85;
 
 type Props = {
-  navigation: NavigationProp<any>;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
 };
 
-export default function HomeScreen({ navigation }: Props) {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>react-native-3d</Text>
-      <Text style={styles.subtitle}>
-        Experimental WebGPU-powered 3D model viewer for React Native. Rendering
-        runs on a dedicated background thread via worklets.
-      </Text>
+export function HomeScreen({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('GPU')}
-      >
-        <Text style={styles.buttonText}>GPU Animation Example</Text>
-      </TouchableOpacity>
+  return (
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom },
+      ]}
+    >
+      <View style={styles.hero}>
+        <Preview3D
+          url="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/main/2.0/Duck/glTF-Binary/Duck.glb"
+          style={styles.heroPreview}
+          lighting={{ preset: 'studio', intensity: 1.2 }}
+          autoRotate={{ axis: 'y', speed: 0.4 }}
+          gestures={false}
+        />
+      </View>
+
+      <View style={styles.content}>
+        <Text style={styles.title}>react-native-3d</Text>
+        <Text style={styles.subtitle}>
+          WebGPU model viewer. Renders on a dedicated GPU thread.
+        </Text>
+      </View>
+
+      <View style={styles.nav}>
+        <Pressable
+          style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+          onPress={() => navigation.navigate('Playground')}
+        >
+          <View>
+            <Text style={styles.rowTitle}>Playground</Text>
+            <Text style={styles.rowSubtitle}>Lighting and camera controls</Text>
+          </View>
+          <Text style={styles.chevron}>{'>'}</Text>
+        </Pressable>
+        <View style={styles.separator} />
+        <Pressable
+          style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+          onPress={() => navigation.navigate('Performance')}
+        >
+          <View>
+            <Text style={styles.rowTitle}>Performance</Text>
+            <Text style={styles.rowSubtitle}>Thread independence demo</Text>
+          </View>
+          <Text style={styles.chevron}>{'>'}</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -27,35 +69,67 @@ export default function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.bg,
+    paddingHorizontal: spacing.lg,
+  },
+  hero: {
+    height: HERO_HEIGHT,
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: colors.surface,
+  },
+  heroPreview: {
+    flex: 1,
+  },
+  content: {
+    marginTop: spacing.xl,
+    marginBottom: spacing.xl,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
+    fontWeight: '700',
+    color: colors.text,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 40,
-    textAlign: 'center',
+    fontSize: 15,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+    lineHeight: 21,
   },
-  button: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 10,
-    marginVertical: 10,
-    minWidth: 250,
+  nav: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
-  buttonText: {
-    color: 'white',
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: spacing.md,
+  },
+  rowPressed: {
+    backgroundColor: colors.border,
+  },
+  rowTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: '500',
+    color: colors.text,
+  },
+  rowSubtitle: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    marginTop: 1,
+  },
+  chevron: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    fontWeight: '300',
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
+    marginLeft: spacing.md,
   },
 });

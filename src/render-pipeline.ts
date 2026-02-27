@@ -149,7 +149,7 @@ export async function renderOnWorkletRuntime(
       const { center, size: modelSize } = computeBoundingBox(positions);
 
       const aspect = width / height;
-      const baseDist = modelSize * 2;
+      const baseDist = modelSize * 1.5;
       const projection = mat4Perspective(
         Math.PI / 3,
         aspect,
