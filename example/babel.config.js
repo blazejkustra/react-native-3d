@@ -1,5 +1,4 @@
 const path = require('path');
-const pak = require('../package.json');
 
 /** @type {import('react-native-worklets/plugin').PluginOptions} */
 const workletsPluginOptions = {

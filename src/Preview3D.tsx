@@ -1,10 +1,22 @@
 import { Canvas, useCanvasRef } from 'react-native-wgpu';
-import { ActivityIndicator, View, type ViewStyle } from 'react-native';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  View,
+  type ViewStyle,
+} from 'react-native';
 import {
   createWorkletRuntime,
   createSynchronizable,
 } from 'react-native-worklets';
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { renderOnWorkletRuntime } from './render-pipeline';
 import type { LightingParams } from './webgpu-renderer';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
@@ -174,7 +186,14 @@ export function Preview3D({
     ).catch(() => {
       readyState.setBlocking(() => ({ ready: false, error: true }));
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const onLoadStable = useCallback(() => onLoad?.(), [onLoad]);
+  const onErrorStable = useCallback(
+    (error: Error) => onError?.(error),
+    [onError]
+  );
 
   useEffect(() => {
     if (!isLoading) return;
@@ -183,38 +202,24 @@ export function Preview3D({
       const state = readyState.getDirty();
       if (state.ready) {
         setIsLoading(false);
-        onLoad?.();
+        onLoadStable();
       } else if (state.error) {
         setIsLoading(false);
-        onError?.(new Error('Failed to load 3D model'));
+        onErrorStable(new Error('Failed to load 3D model'));
       } else {
         id = requestAnimationFrame(poll);
       }
     }
     id = requestAnimationFrame(poll);
     return () => cancelAnimationFrame(id);
-  }, [isLoading]);
+  }, [isLoading, onLoadStable, onErrorStable, readyState]);
 
   const gesture = usePreview3DGestures(cameraState, startAngles, startZoom);
 
   const content = (
     <View style={style}>
-      <Canvas ref={ref} style={{ flex: 1 }} />
-      {isLoading && (
-        <View
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          {loading}
-        </View>
-      )}
+      <Canvas ref={ref} style={styles.canvas} />
+      {isLoading && <View style={styles.loadingOverlay}>{loading}</View>}
     </View>
   );
 
@@ -224,3 +229,18 @@ export function Preview3D({
 
   return <GestureDetector gesture={gesture}>{content}</GestureDetector>;
 }
+
+const styles = StyleSheet.create({
+  canvas: {
+    flex: 1,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
