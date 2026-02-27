@@ -1,5 +1,7 @@
 # react-native-3d
 
+https://github.com/user-attachments/assets/324e4627-839b-4e27-b4e4-fc18ae2d65e1
+
 > **Experimental** -- APIs may change without notice. Relies on react-native-worklets bundle mode, which is not yet stable. Use with caution.
 
 WebGPU-powered 3D model viewer for React Native. Load `.glb` (glTF Binary) models and display them in your app with real-time rendering on a dedicated background thread.
