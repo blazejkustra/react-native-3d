@@ -29,7 +29,23 @@ npm install react-native-wgpu react-native-worklets react-native-gesture-handler
 
 ### Bundle mode setup
 
-This library relies on `react-native-worklets` [Bundle Mode](https://docs.swmansion.com/react-native-worklets/docs/bundleMode). You need to configure Metro and Babel in your app:
+This library relies on `react-native-worklets` [Bundle Mode](https://docs.swmansion.com/react-native-worklets/docs/bundleMode). You need to configure Metro and Babel in your app.
+
+**package.json** (add at root level)
+
+```json
+{
+  "worklets": {
+    "staticFeatureFlags": {
+      "BUNDLE_MODE_ENABLED": true,
+      "FETCH_PREVIEW_ENABLED": true
+    }
+  }
+}
+```
+
+<details>
+<summary><b>Bare React Native</b></summary>
 
 **babel.config.js**
 
@@ -46,26 +62,69 @@ module.exports = {
 
 ```js
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
-const { bundleModeMetroConfig } = require('react-native-worklets/bundleMode');
+const { getBundleModeMetroConfig } = require('react-native-worklets/bundleMode');
 
-module.exports = mergeConfig(
-  getDefaultConfig(__dirname),
-  bundleModeMetroConfig
-);
+let config = mergeConfig(getDefaultConfig(__dirname), {
+  transformer: {
+    getTransformOptions: async () => ({
+      transform: {
+        inlineRequires: true,
+      },
+    }),
+  },
+});
+
+module.exports = getBundleModeMetroConfig(config);
 ```
 
-**package.json** (add at root level)
+</details>
 
-```json
-{
-  "worklets": {
-    "staticFeatureFlags": {
-      "BUNDLE_MODE_ENABLED": true,
-      "FETCH_PREVIEW_ENABLED": true
-    }
-  }
-}
+<details>
+<summary><b>Expo</b></summary>
+
+Install the dev dependency:
+
+```sh
+npx expo install babel-preset-expo
 ```
+
+**babel.config.js**
+
+```js
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo'],
+    plugins: [
+      ['react-native-worklets/plugin', { bundleMode: true, strictGlobal: true }],
+    ],
+  };
+};
+```
+
+**metro.config.js**
+
+```js
+const { getDefaultConfig } = require('expo/metro-config');
+const { getBundleModeMetroConfig } = require('react-native-worklets/bundleMode');
+
+let config = getDefaultConfig(__dirname);
+
+config = getBundleModeMetroConfig(config);
+
+config.transformer = {
+  ...config.transformer,
+  getTransformOptions: async () => ({
+    transform: {
+      inlineRequires: true,
+    },
+  }),
+};
+
+module.exports = config;
+```
+
+</details>
 
 ## Usage
 

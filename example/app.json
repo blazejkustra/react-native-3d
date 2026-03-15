@@ -1,4 +1,25 @@
 {
-  "name": "BundleModeApp",
-  "displayName": "3D Example"
+  "expo": {
+    "name": "RN 3D",
+    "slug": "react-native-3d-example",
+    "version": "1.0.0",
+    "scheme": "react-native-3d-example",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "ios": {
+      "bundleIdentifier": "com.blazejkustra.reactnative3d",
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      },
+      "package": "com.blazejkustra.reactnative3d"
+    }
+  }
 }
